@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace ImageSpark\SpreadsheetParser\Annotations;
+namespace ImageSpark\SpreadsheetParser\Attributes;
 
 /**
  * @Annotation
  * @NamedArgumentConstructor
  * @Target("PROPERTY")
  */
-class Col
+class Column
 {
     /**
      * Правило валидации

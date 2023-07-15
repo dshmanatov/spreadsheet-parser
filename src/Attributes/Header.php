@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace ImageSpark\SpreadsheetParser\Annotations;
+namespace ImageSpark\SpreadsheetParser\Attributes;
 
 use ImageSpark\SpreadsheetParser\Exceptions\ParserException;
 

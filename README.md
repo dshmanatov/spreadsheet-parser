@@ -18,8 +18,8 @@ declare(strict_types=1);
 namespace ImageSpark\SpreadsheetParser;
 
 use Illuminate\Support\Carbon;
-use ImageSpark\SpreadsheetParser\Annotations\Col;
-use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
+use ImageSpark\SpreadsheetParser\Attributes\Column;
+use ImageSpark\SpreadsheetParser\Attributes\NoHeader;
 
 /**
  * POPO example
@@ -59,7 +59,7 @@ class Example
      * You can pass validation rules & messages for every column.
      * @see Col
      *
-     * @Col(rule="required|email", messages={
+     * @Column(rule="required|email", messages={
      *      "email": "Email is required"
      * })
      * @var string
@@ -71,13 +71,13 @@ class Example
      * `mandatory` columns is empty, thus the whole row will be skipped and not processed.
      *
      * For example, this only column is marked as `mandatory`. It means that if this field is empty in the source data the whole row will be skipped.
-     * @Col(mandatory=true, rule="integer")
+     * @Column(mandatory=true, rule="integer")
      * @var integer
      */
     public ?int $rank;
 
     /**
-     * @Col(rule="nullable|date")
+     * @Column(rule="nullable|date")
      *
      * @var Carbon|null
      */
@@ -133,7 +133,7 @@ Array
 (
     [0] => ImageSpark\SpreadsheetParser\Example Object
         (
-            [mail] => 
+            [mail] =>
             [rank] => 123
             [date1] => Illuminate\Support\Carbon Object...
         )
@@ -142,14 +142,14 @@ Array
         (
             [mail] => something@somewhere.org
             [rank] => 2
-            [date1] => 
+            [date1] =>
         )
 
     [2] => ImageSpark\SpreadsheetParser\Example Object
         (
             [mail] => other@mail.com
             [rank] => 4
-            [date1] => 
+            [date1] =>
         )
 
 )

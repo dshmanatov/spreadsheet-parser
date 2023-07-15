@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace ImageSpark\SpreadsheetParser;
 
 use Illuminate\Support\Carbon;
-use ImageSpark\SpreadsheetParser\Annotations\Col;
-use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
+use ImageSpark\SpreadsheetParser\Attributes\Column;
+use ImageSpark\SpreadsheetParser\Attributes\NoHeader;
 
 /**
  * См. пример использования ниже
@@ -33,7 +33,7 @@ use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
 class Example
 {
     /**
-     * @Col(
+     * @Column(
      *      rule="required|email",
      *      messages={
      *          "email": "The email address is required"
@@ -44,7 +44,7 @@ class Example
     public string $mail;
 
     /**
-     * @Col(
+     * @Column(
      *      mandatory=true,
      *      rule="integer"
      * )
@@ -53,7 +53,7 @@ class Example
     public int $rank;
 
     /**
-     * @Col(rule="nullable|date")
+     * @Column(rule="nullable|date")
      *
      * @var Carbon|null
      */

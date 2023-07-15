@@ -11,10 +11,10 @@ use ReflectionClass;
 use ReflectionProperty;
 use Illuminate\Validation\Factory as ValidatorFactory;
 use Doctrine\Common\Annotations\AnnotationReader;
-use ImageSpark\SpreadsheetParser\Annotations\Col;
+use ImageSpark\SpreadsheetParser\Attributes\Column;
 use Doctrine\Common\Annotations\AnnotationException;
-use ImageSpark\SpreadsheetParser\Annotations\Header;
-use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
+use ImageSpark\SpreadsheetParser\Attributes\Header;
+use ImageSpark\SpreadsheetParser\Attributes\NoHeader;
 use ImageSpark\SpreadsheetParser\Exceptions\ParserException;
 use ImageSpark\SpreadsheetParser\Exceptions\ValidationException;
 
@@ -282,11 +282,11 @@ class Parser implements ParserInterface
 
             $annotationFound = false;
             foreach ($annotations as $annotation) {
-                if ($annotation instanceof Col) {
+                if ($annotation instanceof Column) {
                     $propName = $prop->getName();
 
                     if ($annotationFound) {
-                        throw new ParserException("There is more than one @Col per property `{$propName}`");
+                        throw new ParserException("There is more than one @Column per property `{$propName}`");
                     }
 
                     $this->columns[$propName] = $annotation;
@@ -304,12 +304,12 @@ class Parser implements ParserInterface
         }
 
         if (empty($this->columns)) {
-            throw new ParserException("No @Col annotations found");
+            throw new ParserException("No @Column annotations found");
         }
 
         // Удостоверимся, что число пропсов совпадает с числом столбцов в Header
         if (sizeof($this->header->getColumns()) !== sizeof($this->columns)) {
-            throw new ParserException("@Header columns count doesn't match the @Col count");
+            throw new ParserException("@Header columns count doesn't match the @Column count");
         }
 
         return $this;
