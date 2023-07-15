@@ -13,7 +13,8 @@ use ImageSpark\SpreadsheetParser\Attributes\NoHeader;
  *      "email",
  *      "1": "int",
  *      "c": "date",
- *      3: "string",
+ *      "LOL": "string",
+ *      "xXx": "float",
  *  },
  *  messages={
  *      "required": "The required `:attribute` is missing",
@@ -54,4 +55,10 @@ class ValidFixture
      * @var string
      */
     public string $string;
+
+    /**
+     * @Column
+     * @var float
+     */
+    public ?float $float;
 }

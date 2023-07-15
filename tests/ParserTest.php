@@ -52,13 +52,15 @@ class ParserTest extends TestCase
                 'dummy@example.com',
                 1,
                 '',
-                'some string',
+                8513 => 'some string', // LOL column name
+                16871 => null, // XXX column name
             ],
             [
                 'other@mail.com',
                 2,
                 '10/31/1977',
-                'another string',
+                8513 => 'another string', // LOL column name
+                16871 => 12.34, // XXX column name
             ],
         ];
 
