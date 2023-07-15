@@ -11,13 +11,26 @@
     "require": {
         "php": ">=7.4",
         "illuminate/validation": "^8.83",
-        "doctrine/annotations": "1.14.3"
+        "doctrine/annotations": "1.14.3",
+        "carbon-cli/carbon-cli": "^1.2"
     },
     "autoload": {
         "psr-4": {
             "ImageSpark\\SpreadsheetParser\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests"
+        }
+    },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "require-dev": {
+        "phpspec/phpspec": "^7.4",
+        "symfony/phpunit-bridge": "^6.3"
+    },
+    "config": {
+        "bin-dir": "bin"
+    }
 }

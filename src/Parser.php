@@ -221,6 +221,23 @@ class Parser implements ParserInterface
     }
 
     /**
+     * Return `true` if the current row should not be processed
+     *
+     * We skip it when:
+     * - there's at least one empty 'mandatory' column value
+     * - this is a header row
+     *
+     * @param array   $row
+     * @param integer $rowIndex
+     * @return boolean
+     */
+    private function shouldSkipRow(int $rowIndex, array $row): bool
+    {
+        return ($rowIndex < $this->header->getRows())
+            || (!$this->allMandatoryColumnsPresent($row));
+    }
+
+    /**
      * Создает инстансы кастеров
      *
      * @return self
@@ -371,6 +388,12 @@ class Parser implements ParserInterface
 
         foreach ($this->properties as $name => $prop) {
             // Получаем тип свойства
+            $propType = $prop->getType();
+            if ($propType === null) {
+                // No type defined for the mapped class
+                throw new ParserException("No type definition for `{$name}` property");
+            }
+
             $propTypeName = $prop->getType()->getName();
             $format = $this->columns[$name]->getFormat();
             $value = $row[$name] ?: null;
