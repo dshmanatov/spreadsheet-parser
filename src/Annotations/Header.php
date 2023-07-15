@@ -133,9 +133,12 @@ class Header
     {
         $value = 0;
 
-        foreach (explode('', $name) as $char) {
+        foreach (str_split(strtoupper($name)) as $char) {
             $value = $value * 26 + (ord($char) - ord('A') + 1);
         }
+
+        // Так как "внутренний" индекс начинается с нуля, отнимем единицу
+        $value--;
 
         return $value;
     }
