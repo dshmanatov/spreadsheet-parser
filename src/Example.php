@@ -7,18 +7,23 @@ use Illuminate\Support\Carbon;
 use ImageSpark\SpreadsheetParser\Annotations\Col;
 use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
 
-// todo - проверить нуллабельность столбцов
-
 /**
+ * См. пример использования ниже
+ *
+ * - Можно не указывать индекс, если столбцы идут подряд;
+ * - Можно референсить столбцы по числовому индексу (zero based), e.g. 2: "date1";
+ * - Можно (но не нужно) референсить столбцы со строковым индексом (как в Excel),
+ *   регистр символов при этом игнорируется. E.g. "b": "rank".
+ *
  * @NoHeader(
  *  columns={
  *      "mail",
- *      "rank",
- *      "date1",
+ *      2: "date1",
+ *      "b": "rank",
  *  },
  *  messages={
  *      "required": "Глобальное сообщение об отсутствии required столбца",
- *  }
+ *  },
  * )
  */
 class Example
