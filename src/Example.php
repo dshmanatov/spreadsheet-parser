@@ -26,25 +26,31 @@ use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
  *      "b": "rank",
  *  },
  *  messages={
- *      "required": "Глобальное сообщение об отсутствии required столбца",
+ *      "required": "The required `:attribute` is missing",
  *  },
  * )
  */
 class Example
 {
     /**
-     * @Col(rule="required|email", messages={
-     *      "email": "Ты чо не ввел емайл, балда?!"
-     * })
+     * @Col(
+     *      rule="required|email",
+     *      messages={
+     *          "email": "The email address is required"
+     *      }
+     * )
      * @var string
      */
     public string $mail;
 
     /**
-     * @Col(mandatory=true, rule="integer")
+     * @Col(
+     *      mandatory=true,
+     *      rule="integer"
+     * )
      * @var integer
      */
-    public ?int $rank;
+    public int $rank;
 
     /**
      * @Col(rule="nullable|date")

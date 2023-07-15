@@ -373,7 +373,7 @@ class Parser implements ParserInterface
             // Получаем тип свойства
             $propTypeName = $prop->getType()->getName();
             $format = $this->columns[$name]->getFormat();
-            $value = $row['name'] ?: null;
+            $value = $row[$name] ?: null;
             $value = $this->castValueToPropType($value, $propTypeName, $format);
 
             // Записываем значение property в объект
