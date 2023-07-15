@@ -1,0 +1,23 @@
+{
+    "name": "dshmanatov/spreadsheet-parser",
+    "description": "Easy parsing and validation when reading spreadsheets",
+    "authors": [
+        {
+            "name": "Dmitry Shmanatov",
+            "email": "dshmanatov@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "illuminate/validation": "^8.83",
+        "doctrine/annotations": "1.14.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "ImageSpark\\SpreadsheetParser\\": "src"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
