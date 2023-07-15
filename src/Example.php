@@ -33,7 +33,7 @@ use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
 class Example
 {
     /**
-     * @Col(rule="email", messages={
+     * @Col(rule="required|email", messages={
      *      "email": "Ты чо не ввел емайл, балда?!"
      * })
      * @var string
