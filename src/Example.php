@@ -1,9 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace ImageSpark\SpreadsheetParser;
 
 use ImageSpark\SpreadsheetParser\Annotations\Col;
 use ImageSpark\SpreadsheetParser\Annotations\Header;
-use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
 
 // todo - проверить нуллабельность столбцов
 
