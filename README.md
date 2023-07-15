@@ -2,7 +2,7 @@
 
 This library's only purpose is to easily convert table/spreadsheet data into POPO on the fly.
 
-It does not include the spreadsheet reader itself, you can use any readed, e.g. Box/Spout.
+It does not include the spreadsheet reader itself, you can use any 3rd party reader, e.g. Box/Spout.
 
 Since this parser is targeted towards PHP 7.x, it utilizes doctrine/annotations package to parse annotations.
 This library can be easily adapted for use with PHP 8.x and its attributes support.
