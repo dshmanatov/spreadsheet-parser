@@ -25,7 +25,16 @@ class Col
     private array $messages;
 
     /**
-     * Строка считается "не пустой", если все поля с этим флагом присутствуют в строке
+     * Формат столбца.
+     *
+     * Может использоваться для импорта дат и прочего.
+     *
+     * @var string|null
+     */
+    private ?string $format;
+
+    /**
+     * Строка считается "не пустой", если все столбцы с этим флагом присутствуют в строке
      *
      * @var boolean
      */
@@ -35,12 +44,14 @@ class Col
      * Конструктор
      *
      * @param string|null  $rule      - правило валидации
+     * @param string       $format    - формат (e.g. для импорта дат)
      * @param array        $messages  - опциональный массив с кастомными сообщениями об ошибке валидации
-     * @param boolean      $mandatory - `true`, если поле должно присутствовать в строке, чтобы она не считалась "пустой"
+     * @param boolean      $mandatory - `true`, если значение столбца должно присутствовать в строке, чтобы она не считалась "пустой"
      */
-    public function __construct(?string $rule = null, array $messages = [], bool $mandatory = false)
+    public function __construct(?string $rule = null, string $format = null, array $messages = [], bool $mandatory = false)
     {
         $this->rule = $rule;
+        $this->format = $format;
         $this->messages = $messages;
         $this->mandatory = $mandatory;
     }
@@ -73,5 +84,15 @@ class Col
     public function isMandatory(): bool
     {
         return $this->mandatory;
+    }
+
+    /**
+     * Геттер формата столбца.
+     *
+     * @return string|null
+     */
+    public function getFormat(): ?string
+    {
+        return $this->format;
     }
 }

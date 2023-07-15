@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace ImageSpark\SpreadsheetParser;
 
+use Illuminate\Support\Carbon;
+use ImageSpark\SpreadsheetParser\Casters\DateCaster;
+use ImageSpark\SpreadsheetParser\Contracts\CasterInterface;
 use ImageSpark\SpreadsheetParser\Contracts\ParserInterface;
 use ReflectionClass;
 use ReflectionProperty;
@@ -17,6 +20,26 @@ use ImageSpark\SpreadsheetParser\Exceptions\ValidationException;
 
 class Parser implements ParserInterface
 {
+    /**
+     * Дата кастеры, которые могут использоваться
+     *
+     * @var string[]
+     */
+    private const DATA_CASTERS = [
+        Carbon::class => DateCaster::class,
+    ];
+
+    /**
+     * Data caster registry
+     *
+     * Хранит инстансы кастеров.
+     * Ключ - строковое представление типа (integer/string/etc)
+     * Значение - инстанс кастера CasterInterface
+     *
+     * @var CasterInterface[]
+     */
+    private array $casterRegistry = [];
+
     private string $mappedClass;
 
     /**
@@ -86,6 +109,7 @@ class Parser implements ParserInterface
 
         // Порядок вызовов ниже имеет значение!!!
         $this
+            ->registerCasters()
             ->assembleHeader($reader, $reflectionClass)
             ->assembleProperties($reader, $reflectionClass)
             ->assembleValidation();
@@ -194,6 +218,20 @@ class Parser implements ParserInterface
 
             yield $rowIndex => $row;
         }
+    }
+
+    /**
+     * Создает инстансы кастеров
+     *
+     * @return self
+     */
+    private function registerCasters(): self
+    {
+        foreach (self::DATA_CASTERS as $type => $casterClass) {
+            $this->casterRegistry[$type] = new $casterClass;
+        }
+
+        return $this;
     }
 
     /**
@@ -331,15 +369,39 @@ class Parser implements ParserInterface
     {
         $obj = new $this->mappedClass;
 
-        foreach ($this->columns as $name => $column) {
-            $prop = $this->properties[$name];
+        foreach ($this->properties as $name => $prop) {
+            // Получаем тип свойства
+            $propTypeName = $prop->getType()->getName();
+            $format = $this->columns[$name]->getFormat();
+            $value = $this->castValueToPropType($row[$name] ?? null, $propTypeName, $format);
 
             // Записываем значение property в объект
             $prop->setAccessible(true);
-            $prop->setValue($obj, $row[$name] ?? null);
+            $prop->setValue($obj, $value);
         }
 
         return $obj;
+    }
+
+    /**
+     * Преобразовывает строковое значение из spreadsheet в определенный тип
+     *
+     * @param mixed       $value
+     * @param string      $type
+     * @param string|null $format
+     * @return mixed
+     */
+    private function castValueToPropType($value, string $type, ?string $format = null) {
+        // Не обрабатываем null значения
+        if ($value === null) {
+            return $value;
+        }
+
+        if (isset($this->casterRegistry[$type])) {
+            return $this->casterRegistry[$type]->cast($value, $format);
+        }
+
+        return $value;
     }
 
     /**

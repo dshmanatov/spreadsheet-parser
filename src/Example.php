@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace ImageSpark\SpreadsheetParser;
 
+use Illuminate\Support\Carbon;
 use ImageSpark\SpreadsheetParser\Annotations\Col;
 use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
 
@@ -12,7 +13,8 @@ use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
  * @NoHeader(
  *  columns={
  *      "mail",
- *      "rank"
+ *      "rank",
+ *      "date1",
  *  },
  *  messages={
  *      "required": "Глобальное сообщение об отсутствии required столбца",
@@ -22,7 +24,7 @@ use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
 class Example
 {
     /**
-     * @Col(rule="required|email", messages={
+     * @Col(rule="email", messages={
      *      "email": "Ты чо не ввел емайл, балда?!"
      * })
      * @var string
@@ -30,8 +32,15 @@ class Example
     public string $mail;
 
     /**
-     * @Col(rule="required|integer")
+     * @Col(rule="integer")
      * @var integer
      */
     public ?int $rank;
+
+    /**
+     * @Col(rule="nullable|date")
+     *
+     * @var Carbon|null
+     */
+    public ?Carbon $date1;
 }
