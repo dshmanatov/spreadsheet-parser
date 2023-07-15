@@ -20,11 +20,12 @@ class ValidationException extends \Exception
     private ?array $data;
 
     /**
-	 * Constructs the Exception.
-	 *
-	 * @param string|null $message The Exception message to throw.
-	 */
-	function __construct($message = "", ?int $lineNo = null, ?array $data = null) {
+     * Constructs the Exception.
+     *
+     * @param string|null $message The Exception message to throw.
+     */
+    function __construct($message = "", ?int $lineNo = null, ?array $data = null)
+    {
         parent::__construct($message);
 
         $this->lineNo = $lineNo;
