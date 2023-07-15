@@ -15,6 +15,10 @@ use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
  * - Можно (но не нужно) референсить столбцы со строковым индексом (как в Excel),
  *   регистр символов при этом игнорируется. E.g. "b": "rank".
  *
+ * Также можно использовать bool флаг `mandatory`. Если этот флаг присутствует на одном или
+ * нескольких столбцах, то строка будет обрабатываться только в том случае, если все столбцы
+ * с этим флагом имеют "непустые" значения.
+ *
  * @NoHeader(
  *  columns={
  *      "mail",
@@ -37,7 +41,7 @@ class Example
     public string $mail;
 
     /**
-     * @Col(rule="integer")
+     * @Col(mandatory=true, rule="integer")
      * @var integer
      */
     public ?int $rank;
