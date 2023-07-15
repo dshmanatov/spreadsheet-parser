@@ -22,6 +22,29 @@ class ParserTest extends TestCase
         new Parser(\stdClass::class);
     }
 
+    public function testValidFixtureWithNoMandatoryValues()
+    {
+        $data = [
+            [
+                'dummy@example.com',
+                '',
+                '',
+                'some string',
+            ],
+            [
+                'other@mail.com',
+                null,
+                '10/31/1977',
+                'another string',
+            ],
+        ];
+
+        $parser = $this->getParser(ValidFixture::class);
+        $result = iterator_to_array($parser->parse($data));
+
+        $this->assertEmpty($result);
+    }
+
     public function testValidFixtureWithDataArray()
     {
         $data = [
