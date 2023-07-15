@@ -3,20 +3,21 @@ declare(strict_types=1);
 
 namespace ImageSpark\SpreadsheetParser;
 
-use Doctrine\Common\Annotations\AnnotationException;
-use ImageSpark\SpreadsheetParser\Exceptions\ParserException;
-use ImageSpark\SpreadsheetParser\Exceptions\ValidationException;
+use ImageSpark\SpreadsheetParser\Contracts\ParserInterface;
 use ReflectionClass;
 use ReflectionProperty;
+use Illuminate\Validation\Factory as ValidatorFactory;
+use Doctrine\Common\Annotations\AnnotationReader;
 use ImageSpark\SpreadsheetParser\Annotations\Col;
+use Doctrine\Common\Annotations\AnnotationException;
 use ImageSpark\SpreadsheetParser\Annotations\Header;
 use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
-use Doctrine\Common\Annotations\AnnotationReader;
+use ImageSpark\SpreadsheetParser\Exceptions\ParserException;
+use ImageSpark\SpreadsheetParser\Exceptions\ValidationException;
 
-class Parser
+class Parser implements ParserInterface
 {
-    private iterable $data;
-    private string   $mappedClass;
+    private string $mappedClass;
 
     /**
      * Header
@@ -54,74 +55,133 @@ class Parser
     private array $mandatoryColumns = [];
 
     /**
+     * Правила валидации
+     *
+     * Использует имя столбца в качестве ключа
+     *
+     * @var array
+     */
+    private array $rules = [];
+
+    /**
+     * Сообщения об ошибках валидации
+     *
+     * @var array
+     */
+    private array $messages = [];
+
+    private ?ValidatorFactory $validatorFactory = null;
+
+    /**
      * Конструктор
      *
-     * @param iterable  $data
      * @param string    $mappedClass
      */
-    public function __construct(iterable $data, string $mappedClass)
+    public function __construct(string $mappedClass)
     {
-        $this->data = $data;
         $this->mappedClass = $mappedClass;
 
         $reader = new AnnotationReader;
         $reflectionClass = new ReflectionClass($mappedClass);
 
-        // Порядок вызовов ниже важен
-        $this->assembleHeader($reader, $reflectionClass);
-        $this->assembleProperties($reader, $reflectionClass);
+        // Порядок вызовов ниже имеет значение!!!
+        $this
+            ->assembleHeader($reader, $reflectionClass)
+            ->assembleProperties($reader, $reflectionClass)
+            ->assembleValidation();
     }
 
     /**
-     * Валидирует и парсит таблицу
+     * Сеттер для Validation/Factory
      *
-     * @return \Generator|object[]
-     * @throws ValidationException
+     * @param ValidatorFactory $validationFactory
+     * @return self
      */
-    public function parse(): \Generator
+    public function setValidatorFactory(ValidatorFactory $validatorFactory): self
     {
-        foreach ($this->rows() as $rowIndex => $row)
+        $this->validatorFactory = $validatorFactory;
+
+        return $this;
+    }
+
+    public function validateAll(iterable $rows): void
+    {
+        foreach ($this->filterRows($rows) as $rowIndex => $row)
         {
-            yield $rowIndex => $this->parseRow($row);
+            $this->validateRow($row, $rowIndex);
+        }
+    }
+
+    public function parse(iterable $rows): \Generator
+    {
+        foreach ($this->filterRows($rows) as $rowIndex => $row)
+        {
+            // содержит массив с именами пропсов в виде ключей и валидированными значениями
+            $validatedRow = $this->validateRow($row, $rowIndex);
+
+            yield $rowIndex => $this->parseValidatedRow($validatedRow, $rowIndex);
         }
     }
 
     /**
-     * Валидирует все строки
+     * Валидирует строку.
      *
-     * @return \Generator
-     * @throws ValidationException
-     */
-    public function validate(): \Generator
-    {
-        foreach ($this->rows() as $rowIndex => $row)
-        {
-            $validatedRow = $this->validateRow($row);
-
-            yield $rowIndex => $this->parseRow($validatedRow);
-        }
-    }
-
-    /**
-     * Валидирует строку
+     * На входе получает "сырую" строку с числовыми индексами. В случае успешного прохождения
+     * валидации возвращает ассоциативный массив с именами пропсов в виде ключей.
      *
      * @param array $row
+     * @param int   $rowIndex
      * @return array
      * @throws ValidationException
      */
-    private function validateRow(array $row): array
+    private function validateRow(array $row, int $rowIndex): array
     {
-        return $row;
+        if ($this->validatorFactory === null) {
+            throw new ValidationException("No validator factory configured");
+        }
+
+        // Преобразуем $row в ассоциативный массив, используя имена пропсов
+        $mappedRow = $this->convertIndexedRowToHavePropsNamesAsKeys($row);
+
+        $validator = $this
+            ->validatorFactory
+            ->make($mappedRow, $this->rules, $this->messages);
+
+        if ($validator->fails()) {
+            $errorMsg = $validator->messages()->toJson(JSON_UNESCAPED_UNICODE);
+            throw new ValidationException($errorMsg, $rowIndex);
+        }
+
+        return $validator->getData();
     }
 
     /**
-     * Все строки таблицы
+     * Преобразовывает исходный "сырой" массив с числовыми ключами в ассоциативный, используя имена пропсов
      *
+     * @param array $row
+     * @return $row
+     */
+    private function convertIndexedRowToHavePropsNamesAsKeys(array $row): array
+    {
+        $mappedRow = [];
+        foreach ($this->columns as $name => $column) {
+            $columnIndex = $this->indexes[$name];
+
+            $mappedRow[$name] = $row[$columnIndex] ?? null;
+        }
+
+        return $mappedRow;
+    }
+
+    /**
+     * Исключает строки, которые не требуют обработки
+     *
+     * @param iterable $rows
      * @return \Generator|mixed[]
      */
-    private function rows(): \Generator
+    private function filterRows(iterable $rows): \Generator
     {
-        foreach ($this->data as $rowIndex => $row) {
+        foreach ($rows as $rowIndex => $row) {
             // пропускаем Header rows
             if ($rowIndex < $this->header->getRows()) {
                 continue;
@@ -141,10 +201,10 @@ class Parser
      *
      * @param  AnnotationReader $reader
      * @param  ReflectionClass $reflectionClass
-     * @return void
+     * @return self
      * @throws ParserException
      */
-    private function assembleHeader(AnnotationReader $reader, ReflectionClass $reflectionClass): void
+    private function assembleHeader(AnnotationReader $reader, ReflectionClass $reflectionClass): self
     {
         try {
             $header = $this->getHeaderAnnotation($reader, $reflectionClass);
@@ -159,6 +219,8 @@ class Parser
         }
 
         $this->header = $header;
+
+        return $this;
     }
 
     /**
@@ -166,10 +228,10 @@ class Parser
      *
      * @param AnnotationReader $reader
      * @param ReflectionClass $reflectionClass
-     * @return void
+     * @return self
      * @throws ParserException
      */
-    private function assembleProperties(AnnotationReader $reader, ReflectionClass $reflectionClass): void
+    private function assembleProperties(AnnotationReader $reader, ReflectionClass $reflectionClass): self
     {
         $props = $reflectionClass->getProperties();
         foreach ($props as $prop)
@@ -211,6 +273,34 @@ class Parser
         if (sizeof($this->header->getColumns()) !== sizeof($this->columns)) {
             throw new ParserException("@Header columns count doesn't match the @Col count");
         }
+
+        return $this;
+    }
+
+    private function assembleValidation(): self
+    {
+        // Сообщения валидации из Header
+        $this->messages = $this->header->getMessages();
+
+        // Правила валидации для строк
+        foreach ($this->columns as $name => $column) {
+            // rules
+            $rule = $column->getRule();
+
+            if ($rule !== null) {
+                $this->rules[$name] = $rule;
+            }
+
+            // messages (для Col, еще могут быть заданы global messages в Header)
+            $messages = $column->getMessages();
+            if ($messages) {
+                foreach ($messages as $k => $message) {
+                    $this->messages["{$name}.{$k}"] = $message;
+                }
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -231,23 +321,22 @@ class Parser
     }
 
     /**
-     * Парсив raw массив строки
+     * Парсив валидированного массива, уже использующего имена пропсов в виде ключей
      *
      * @param  array  $row
+     * @param  int    $rowIndex
      * @return object
      */
-    private function parseRow(array $row): object
+    private function parseValidatedRow(array $row, int $rowIndex): object
     {
         $obj = new $this->mappedClass;
 
         foreach ($this->columns as $name => $column) {
-            $columnIndex = $this->indexes[$name];
-
             $prop = $this->properties[$name];
 
             // Записываем значение property в объект
             $prop->setAccessible(true);
-            $prop->setValue($obj, $row[$columnIndex] ?? null);
+            $prop->setValue($obj, $row[$name] ?? null);
         }
 
         return $obj;

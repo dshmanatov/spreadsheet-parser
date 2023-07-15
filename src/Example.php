@@ -4,37 +4,34 @@ declare(strict_types=1);
 namespace ImageSpark\SpreadsheetParser;
 
 use ImageSpark\SpreadsheetParser\Annotations\Col;
-use ImageSpark\SpreadsheetParser\Annotations\Header;
+use ImageSpark\SpreadsheetParser\Annotations\NoHeader;
 
 // todo - проверить нуллабельность столбцов
 
 /**
- * @Header(
- *  rows=2,
+ * @NoHeader(
  *  columns={
- *      "email",
- *      "rank",
- *      3: "third",
+ *      "mail",
+ *      "rank"
+ *  },
+ *  messages={
+ *      "required": "Глобальное сообщение об отсутствии required столбца",
  *  }
  * )
  */
 class Example
 {
     /**
-     * @Col
+     * @Col(rule="required|email", messages={
+     *      "email": "Ты чо не ввел емайл, балда?!"
+     * })
      * @var string
      */
-    public ?string $email;
+    public string $mail;
 
     /**
      * @Col(rule="required|integer")
      * @var integer
      */
     public ?int $rank;
-
-    /**
-     * @Col
-     * @var string
-     */
-    public ?string $third;
 }

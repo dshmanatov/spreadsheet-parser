@@ -31,6 +31,13 @@ class Header
     private array $columns;
 
     /**
+     * Глобальные сообщения валидации, т.е. не привязанные к столбцам
+     *
+     * @var array
+     */
+    private array $messages;
+
+    /**
      * Конструктор.
      *
      * Обязательно требуется передавать число строк, занимаемых заголовком.
@@ -38,10 +45,11 @@ class Header
      *
      * @see NoHeader
      *
-     * @param array   $columns - маппинги столбцов (index -> имя пропса)
-     * @param integer $rows    - кол-во строк в заголовке
+     * @param array   $columns  - маппинги столбцов (index -> имя пропса)
+     * @param integer $rows     - кол-во строк в заголовке
+     *
      */
-    public function __construct(array $columns, int $rows = 1)
+    public function __construct(array $columns, int $rows = 1, array $messages = [])
     {
         if (empty($columns)) {
             throw new ParserException("At least one column must be specified in the header");
@@ -49,6 +57,7 @@ class Header
 
         $this->columns = $columns;
         $this->rows = $rows;
+        $this->messages = $messages;
     }
 
     /**
@@ -102,6 +111,16 @@ class Header
     public function getColumns(): array
     {
         return $this->columns;
+    }
+
+    /**
+     * Возвращает массив с "глобальными" сообщениями валидации
+     *
+     * @return array
+     */
+    public function getMessages(): array
+    {
+        return $this->messages;
     }
 
     /**

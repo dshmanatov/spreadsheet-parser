@@ -13,11 +13,12 @@ class NoHeader extends Header
     /**
      * Конструктор
      *
-     * @param array $fields - маппинги столбцов
+     * @param array   $columns  - маппинги столбцов (index -> имя пропса)
+     * @param array   $messages - "глобальные" сообщения валидации
      */
-    public function __construct(array $columns)
+    public function __construct(array $columns, array $messages = [])
     {
         // Отсутствует header. Используем 0 строк, но используем маппинги
-        parent::__construct($columns, 0);
+        parent::__construct($columns, 0, $messages);
     }
 }
