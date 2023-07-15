@@ -3,6 +3,7 @@ namespace ImageSpark\SpreadsheetParser;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use ImageSpark\SpreadsheetParser\Exceptions\ParserException;
+use ImageSpark\SpreadsheetParser\Exceptions\ValidationException;
 use ReflectionClass;
 use ReflectionProperty;
 use ImageSpark\SpreadsheetParser\Annotations\Col;
@@ -12,8 +13,8 @@ use Doctrine\Common\Annotations\AnnotationReader;
 
 class Parser
 {
-    private array $data;
-    private string $mappedClass;
+    private iterable $data;
+    private string   $mappedClass;
 
     /**
      * Header
@@ -53,10 +54,10 @@ class Parser
     /**
      * Конструктор
      *
-     * @param array  $data
-     * @param string $mappedClass
+     * @param iterable  $data
+     * @param string    $mappedClass
      */
-    public function __construct(array $data, string $mappedClass)
+    public function __construct(iterable $data, string $mappedClass)
     {
         $this->data = $data;
         $this->mappedClass = $mappedClass;
@@ -70,14 +71,55 @@ class Parser
     }
 
     /**
-     * Йелдит объекты, полученные из spreadsheet
+     * Валидирует и парсит таблицу
+     *
+     * @return \Generator|object[]
+     * @throws ValidationException
+     */
+    public function parse(): \Generator
+    {
+        foreach ($this->rows() as $rowIndex => $row)
+        {
+            yield $rowIndex => $this->parseRow($row);
+        }
+    }
+
+    /**
+     * Валидирует все строки
      *
      * @return \Generator
+     * @throws ValidationException
      */
-    public function parseRows(): \Generator
+    public function validate(): \Generator
     {
-        foreach ($this->data as $rowIndex => $row)
+        foreach ($this->rows() as $rowIndex => $row)
         {
+            $validatedRow = $this->validateRow($row);
+
+            yield $rowIndex => $this->parseRow($validatedRow);
+        }
+    }
+
+    /**
+     * Валидирует строку
+     *
+     * @param array $row
+     * @return array
+     * @throws ValidationException
+     */
+    private function validateRow(array $row): array
+    {
+        return $row;
+    }
+
+    /**
+     * Все строки таблицы
+     *
+     * @return \Generator|mixed[]
+     */
+    private function rows(): \Generator
+    {
+        foreach ($this->data as $rowIndex => $row) {
             // пропускаем Header rows
             if ($rowIndex < $this->header->getRows()) {
                 continue;
@@ -88,7 +130,7 @@ class Parser
                 continue;
             }
 
-            yield $rowIndex => $this->parseRow($row);
+            yield $rowIndex => $row;
         }
     }
 
@@ -207,11 +249,6 @@ class Parser
         }
 
         return $obj;
-    }
-
-    private function validateRow(array $row)
-    {
-        // validator(...)
     }
 
     /**
