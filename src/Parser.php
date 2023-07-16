@@ -3,20 +3,16 @@ declare(strict_types=1);
 
 namespace ImageSpark\SpreadsheetParser;
 
+use Doctrine\Common\Annotations\AnnotationException;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
+use ImageSpark\SpreadsheetParser\Attributes\{Column, Header, NoHeader};
 use ImageSpark\SpreadsheetParser\Casters\DateCaster;
-use ImageSpark\SpreadsheetParser\Contracts\CasterInterface;
-use ImageSpark\SpreadsheetParser\Contracts\ParserInterface;
+use ImageSpark\SpreadsheetParser\Contracts\{CasterInterface, ParserInterface};
+use ImageSpark\SpreadsheetParser\Exceptions\{ParserException, ValidationException};
 use ReflectionClass;
 use ReflectionProperty;
-use Doctrine\Common\Annotations\AnnotationReader;
-use ImageSpark\SpreadsheetParser\Attributes\Column;
-use Doctrine\Common\Annotations\AnnotationException;
-use ImageSpark\SpreadsheetParser\Attributes\Header;
-use ImageSpark\SpreadsheetParser\Attributes\NoHeader;
-use ImageSpark\SpreadsheetParser\Exceptions\ParserException;
-use ImageSpark\SpreadsheetParser\Exceptions\ValidationException;
 
 class Parser implements ParserInterface
 {
@@ -115,16 +111,14 @@ class Parser implements ParserInterface
 
     public function validateAll(iterable $rows): void
     {
-        foreach ($this->filterRows($rows) as $rowIndex => $row)
-        {
+        foreach ($this->filterRows($rows) as $rowIndex => $row) {
             $this->validateRow($row, $rowIndex);
         }
     }
 
     public function parse(iterable $rows): \Generator
     {
-        foreach ($this->filterRows($rows) as $rowIndex => $row)
-        {
+        foreach ($this->filterRows($rows) as $rowIndex => $row) {
             // содержит массив с именами пропсов в виде ключей и валидированными значениями
             $validatedRow = $this->validateRow($row, $rowIndex);
 
@@ -268,8 +262,7 @@ class Parser implements ParserInterface
     private function assembleProperties(AnnotationReader $reader, ReflectionClass $reflectionClass): self
     {
         $props = $reflectionClass->getProperties();
-        foreach ($props as $prop)
-        {
+        foreach ($props as $prop) {
             try {
                 $annotations = $reader->getPropertyAnnotations($prop);
             } catch (AnnotationException $e) {
@@ -394,7 +387,8 @@ class Parser implements ParserInterface
      * @param string|null $format
      * @return mixed
      */
-    private function castValueToPropType($value, string $type, ?string $format = null) {
+    private function castValueToPropType($value, string $type, ?string $format = null)
+    {
         // Не обрабатываем null значения
         if ($value === null) {
             return $value;

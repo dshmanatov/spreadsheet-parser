@@ -32,6 +32,10 @@
         "symfony/phpunit-bridge": "^6.3"
     },
     "config": {
-        "bin-dir": "bin"
+        "platform-check": false,
+        "bin-dir": "bin",
+        "platform": {
+			"php": "7.4.33"
+		}
     }
 }
