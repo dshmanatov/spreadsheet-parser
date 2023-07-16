@@ -4,6 +4,8 @@ namespace Tests;
 use Illuminate\Container\Container;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Facade;
+use ImageSpark\SpreadsheetParser\Facades\SpreadsheetParser;
+use ImageSpark\SpreadsheetParser\Factory;
 use PHPUnit\Framework\TestCase;
 use Tests\Fixtures\ValidFixture;
 
@@ -108,7 +110,8 @@ class ParserTest extends TestCase
 
     private function getParser(string $class): ParserInterface
     {
-        $parser = new Parser($class);
+        $parser = SpreadsheetParser::make($class);
+        // $parser = (new Factory)->make($class);
 
         return $parser;
     }
