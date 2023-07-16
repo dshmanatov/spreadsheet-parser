@@ -57,7 +57,7 @@ class Example
 {
     /**
      * You can pass validation rules & messages for every column.
-     * @see Col
+     * @see Column
      *
      * @Column(rule="required|email", messages={
      *      "email": "Email is required"
