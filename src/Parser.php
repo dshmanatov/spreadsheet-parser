@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace ImageSpark\SpreadsheetParser;
 
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
 use ImageSpark\SpreadsheetParser\Casters\DateCaster;
 use ImageSpark\SpreadsheetParser\Contracts\CasterInterface;
 use ImageSpark\SpreadsheetParser\Contracts\ParserInterface;
 use ReflectionClass;
 use ReflectionProperty;
-use Illuminate\Validation\Factory as ValidatorFactory;
 use Doctrine\Common\Annotations\AnnotationReader;
 use ImageSpark\SpreadsheetParser\Attributes\Column;
 use Doctrine\Common\Annotations\AnnotationException;
@@ -93,8 +93,6 @@ class Parser implements ParserInterface
      */
     private array $messages = [];
 
-    private ?ValidatorFactory $validatorFactory = null;
-
     /**
      * Конструктор
      *
@@ -113,19 +111,6 @@ class Parser implements ParserInterface
             ->assembleHeader($reader, $reflectionClass)
             ->assembleProperties($reader, $reflectionClass)
             ->assembleValidation();
-    }
-
-    /**
-     * Сеттер для Validation/Factory
-     *
-     * @param ValidatorFactory $validationFactory
-     * @return self
-     */
-    public function setValidatorFactory(ValidatorFactory $validatorFactory): self
-    {
-        $this->validatorFactory = $validatorFactory;
-
-        return $this;
     }
 
     public function validateAll(iterable $rows): void
@@ -160,16 +145,10 @@ class Parser implements ParserInterface
      */
     private function validateRow(array $row, int $rowIndex): array
     {
-        if ($this->validatorFactory === null) {
-            throw new ValidationException("No validator factory configured");
-        }
-
         // Преобразуем $row в ассоциативный массив, используя имена пропсов
         $mappedRow = $this->convertIndexedRowToHavePropsNamesAsKeys($row);
 
-        $validator = $this
-            ->validatorFactory
-            ->make($mappedRow, $this->rules, $this->messages);
+        $validator = Validator::make($mappedRow, $this->rules, $this->messages);
 
         if ($validator->fails()) {
             $errorMsg = $validator->messages()->toJson(JSON_UNESCAPED_UNICODE);

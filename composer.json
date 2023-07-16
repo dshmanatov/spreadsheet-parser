@@ -10,7 +10,8 @@
     ],
     "require": {
         "php": ">=7.4",
-        "illuminate/validation": "^8.83",
+        "illuminate/validation": "^8.0",
+        "illuminate/support": "^8.0",
         "doctrine/annotations": "1.14.3",
         "carbon-cli/carbon-cli": "^1.2"
     },

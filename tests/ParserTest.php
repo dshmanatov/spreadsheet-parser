@@ -1,7 +1,9 @@
 <?php
 namespace Tests;
 
+use Illuminate\Container\Container;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Facade;
 use PHPUnit\Framework\TestCase;
 use Tests\Fixtures\ValidFixture;
 
@@ -14,6 +16,26 @@ use ImageSpark\SpreadsheetParser\Exceptions\ParserException;
 
 class ParserTest extends TestCase
 {
+    public function setUp(): void
+    {
+        $app = new Container();
+
+        $translator = new Translator(new ArrayLoader(), 'en_EN');
+        $validatorFactory = new ValidatorFactory($translator);
+
+        $app->bind('validator', static fn() => $validatorFactory);
+
+        Container::setInstance($app);
+        Facade::setFacadeApplication($app);
+    }
+
+    public function tearDown(): void
+    {
+        Facade::clearResolvedInstances();
+        Facade::setFacadeApplication(null);
+        Container::setInstance(null);
+    }
+
     public function testParseClassWithoutHeaderAttribute()
     {
         $this->expectException(ParserException::class);
@@ -86,11 +108,7 @@ class ParserTest extends TestCase
 
     private function getParser(string $class): ParserInterface
     {
-        $translator = new Translator(new ArrayLoader(), 'ru_RU');
-        $validatorFactory = new ValidatorFactory($translator);
-
         $parser = new Parser($class);
-        $parser->setValidatorFactory($validatorFactory);
 
         return $parser;
     }

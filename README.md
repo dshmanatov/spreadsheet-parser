@@ -88,8 +88,6 @@ class Example
 ### Sample usage
 ```php
 <?php
-use Illuminate\Translation\Translator;
-use Illuminate\Translation\ArrayLoader;
 use ImageSpark\SpreadsheetParser\Exceptions\ValidationException;
 use ImageSpark\SpreadsheetParser\Parser;
 use ImageSpark\SpreadsheetParser\Example;
@@ -116,11 +114,7 @@ $data = [
 // since it accepts iterable, you can also pass an iterable
 $data = (static fn() => yield from $data)();
 
-$translator = new Translator(new ArrayLoader(), 'en_EN');
-$validatorFactory = new ValidatorFactory($translator);
-
 $parser = new Parser(Example::class);
-$parser->setValidatorFactory($validatorFactory);
 
 print_r(iterator_to_array($parser->parse($data)));
 
