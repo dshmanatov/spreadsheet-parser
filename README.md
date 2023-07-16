@@ -89,9 +89,8 @@ class Example
 ```php
 <?php
 use ImageSpark\SpreadsheetParser\Exceptions\ValidationException;
+use ImageSpark\SpreadsheetParser\Facades\SpreadsheetParser;
 use ImageSpark\SpreadsheetParser\Parser;
-use ImageSpark\SpreadsheetParser\Example;
-use Illuminate\Validation\Factory as ValidatorFactory;
 
 require "./vendor/autoload.php";
 
@@ -114,7 +113,7 @@ $data = [
 // since it accepts iterable, you can also pass an iterable
 $data = (static fn() => yield from $data)();
 
-$parser = new Parser(Example::class);
+$parser = SpreadsheetParser::make(Example::class);
 
 print_r(iterator_to_array($parser->parse($data)));
 
