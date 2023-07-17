@@ -48,7 +48,7 @@ class Parser implements ParserInterface
     /**
      * Columns
      *
-     * @var Col[]
+     * @var Column[]
      */
     private array $columns;
 
